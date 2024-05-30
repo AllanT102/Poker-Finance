@@ -15,6 +15,111 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/FriendRequests/{id}": {
+            "put": {
+                "description": "Update a FriendRequest's status by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend-request"
+                ],
+                "summary": "Update a friend request by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "friend request ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "FriendRequest Update Input",
+                        "name": "FriendRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api_handlers.UpdateFriendRequestInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.FriendRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend-request": {
+            "post": {
+                "description": "Create a new friend request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend-request"
+                ],
+                "summary": "Create a new friend request",
+                "parameters": [
+                    {
+                        "description": "Friend Request Input",
+                        "name": "FriendRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api_handlers.CreateFriendRequestInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.FriendRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/games": {
             "post": {
                 "description": "Create a new game",
@@ -403,15 +508,15 @@ const docTemplate = `{
         },
         "/users/{id}": {
             "get": {
-                "description": "Get a user by ID",
+                "description": "Get a user by email",
                 "tags": [
                     "users"
                 ],
-                "summary": "Get a user by ID",
+                "summary": "Get a user by email",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User ID",
+                        "description": "User email",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -479,6 +584,47 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}/friends": {
+            "get": {
+                "description": "Get all friends of a user by user ID",
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get friends by user ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/backend_internal_models.FriendRequest"
+                            }
                         }
                     },
                     "404": {
@@ -698,6 +844,30 @@ const docTemplate = `{
                 }
             }
         },
+        "backend_internal_models.FriendRequest": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "friend_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "e.g., \"pending\", \"accepted\", \"declined\"",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "backend_internal_models.Game": {
             "type": "object",
             "properties": {
@@ -816,6 +986,26 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_api_handlers.CreateFriendRequestInput": {
+            "type": "object",
+            "required": [
+                "friend_email",
+                "status",
+                "user_id"
+            ],
+            "properties": {
+                "friend_email": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "e.g., \"pending\", \"accepted\", \"declined\"",
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_api_handlers.CreatePaymentDetailsInput": {
             "type": "object",
             "required": [
@@ -893,6 +1083,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.UpdateFriendRequestInput": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "description": "e.g., \"pending\", \"accepted\", \"declined\"",
                     "type": "string"
                 }
             }

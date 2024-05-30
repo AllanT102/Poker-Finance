@@ -16,6 +16,7 @@ func SetupRoutes(router *gin.Engine) {
 	
 		// User routes
 		v1.GET("/users/:id", handlers.GetUserByID)
+		v1.GET("/users/email/:email", handlers.GetUserByEmail)
 		v1.POST("/users", handlers.CreateUser)
 		v1.PUT("/users/:id", handlers.UpdateUser)
 	
@@ -38,5 +39,10 @@ func SetupRoutes(router *gin.Engine) {
 		v1.GET("/payment-details/:id", handlers.GetPaymentDetailsByID)
 		v1.POST("/payment-details", handlers.CreatePaymentDetails)
 		v1.PUT("/payment-details/:id", handlers.UpdatePaymentDetails)
+
+		// friends
+		v1.POST("/friend-request", handlers.CreateFriendRequest)
+		v1.PUT("/friend-request/:id", handlers.UpdateFriendRequest)
+		v1.GET("/users/:id/friends", handlers.GetUserFriends)
 	}
 }

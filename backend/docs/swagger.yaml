@@ -5,6 +5,22 @@ definitions:
       error:
         type: string
     type: object
+  backend_internal_models.FriendRequest:
+    properties:
+      created_at:
+        type: string
+      friend_id:
+        type: string
+      id:
+        type: string
+      status:
+        description: e.g., "pending", "accepted", "declined"
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   backend_internal_models.Game:
     properties:
       date:
@@ -82,6 +98,20 @@ definitions:
       name:
         type: string
     type: object
+  internal_api_handlers.CreateFriendRequestInput:
+    properties:
+      friend_email:
+        type: string
+      status:
+        description: e.g., "pending", "accepted", "declined"
+        type: string
+      user_id:
+        type: string
+    required:
+    - friend_email
+    - status
+    - user_id
+    type: object
   internal_api_handlers.CreatePaymentDetailsInput:
     properties:
       amount:
@@ -137,6 +167,14 @@ definitions:
     - game_id
     - user_id
     type: object
+  internal_api_handlers.UpdateFriendRequestInput:
+    properties:
+      status:
+        description: e.g., "pending", "accepted", "declined"
+        type: string
+    required:
+    - status
+    type: object
   internal_api_handlers.UpdatePaymentDetailsInput:
     properties:
       amount:
@@ -182,6 +220,75 @@ info:
   title: Poker Finance API
   version: "1.0"
 paths:
+  /FriendRequests/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update a FriendRequest's status by ID
+      parameters:
+      - description: friend request ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: FriendRequest Update Input
+        in: body
+        name: FriendRequest
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.UpdateFriendRequestInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.FriendRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Update a friend request by ID
+      tags:
+      - friend-request
+  /friend-request:
+    post:
+      consumes:
+      - application/json
+      description: Create a new friend request
+      parameters:
+      - description: Friend Request Input
+        in: body
+        name: FriendRequest
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateFriendRequestInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend_internal_models.FriendRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Create a new friend request
+      tags:
+      - friend-request
   /games:
     post:
       description: Create a new game
@@ -438,9 +545,9 @@ paths:
       - users
   /users/{id}:
     get:
-      description: Get a user by ID
+      description: Get a user by email
       parameters:
-      - description: User ID
+      - description: User email
         in: path
         name: id
         required: true
@@ -458,7 +565,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/backend_internal_models.ErrorResponse'
-      summary: Get a user by ID
+      summary: Get a user by email
       tags:
       - users
     put:
@@ -497,6 +604,33 @@ paths:
           schema:
             $ref: '#/definitions/backend_internal_models.ErrorResponse'
       summary: Update user information
+      tags:
+      - users
+  /users/{id}/friends:
+    get:
+      description: Get all friends of a user by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/backend_internal_models.FriendRequest'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Get friends by user ID
       tags:
       - users
   /users/{id}/played-games:

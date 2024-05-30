@@ -60,6 +60,30 @@ func GetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// GetUserByEmail godoc
+// @Summary Get a user by email
+// @Description Get a user by email
+// @Tags users
+// @Param id path string true "User email"
+// @Success 200 {object} models.User
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /users/{id} [get]
+func GetUserByEmail(c *gin.Context) {
+	email := c.Param("email")
+	var user models.User
+	result := config.DB.First(&user, "email = ?", email)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
 // CreateUser godoc
 // @Summary Create a new user
 // @Description Create a new user
@@ -277,4 +301,36 @@ func GetUserTransactions(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, transactions)
+}
+
+// GetUserFriends godoc
+// @Summary Get friends by user ID
+// @Description Get all friends of a user by user ID
+// @Tags users
+// @Param id path string true "User ID"
+// @Success 200 {array} models.FriendRequest
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /users/{id}/friends [get]
+func GetUserFriends(c *gin.Context) {
+	id := c.Param("id")
+	userID, err := uuid.Parse(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{Error: "invalid User ID format"})
+		return
+	}
+
+	var friends []models.FriendRequest
+	result := config.DB.Where("user_id = ? OR friend_id = ?", userID, userID).Find(&friends)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: result.Error.Error()})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{Error: "No friends found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, friends)
 }
