@@ -1,0 +1,167 @@
+Backend:
+- AWS EC2 -> then migrate to AWS Lambda Serverless
+- AWS RDS - PostgreSQL
+- Go - gin
+- Google SSO?
+
+# DB Schema
+
+# PaymentDetails
+# ID: UUID
+# payerID: UUID
+# payeeID: UUID
+# amount: Integer
+# Details: String
+# TimeSubmitted: DateTime
+# TimeCompleted: DateTime
+# Status: String -> "Completed, Cancelled, Pending"
+
+# Transaction
+# ID: UUID
+# userID: UUID
+# paymentDetailsID: UUID
+# createdAt: DateTtime
+# status: String
+# amount: Integer
+
+# User
+# ID: UUID
+# Email: string
+# Name: string
+# DisplayName: string
+# Balance: int
+
+# Game
+# ID: UUID
+# Date: DateTime
+
+# PlayedGames
+# GameSessionID: UUID -> FK
+# PlayerID: UUID -> FK
+# BuyIn: integer
+# EndAmount: integer
+
+# Backend API Endpoints
+
+
+## Authentication
+Describe your authentication mechanisms here (e.g., OAuth2, API keys).
+
+---
+
+## Users
+
+### List Users
+- **GET** `/users`
+  - **Description**: Retrieve a list of all users.
+  - **Response**: `200 OK`, JSON array of user objects.
+
+### Get User by ID
+- **GET** `/users/{id}`
+  - **Description**: Retrieve details of a specific user.
+  - **Parameters**:
+    - `id` (path): The ID of the user to retrieve.
+  - **Response**: `200 OK`, JSON object of the user.
+
+### Create User
+- **POST** `/users`
+  - **Description**: Create a new user.
+  - **Body**: JSON object containing user details.
+  - **Response**: `201 Created`, JSON object of the created user.
+
+### Update User Information
+- **PUT** `/users/{id}`
+  - **Description**: Update existing user information.
+  - **Parameters**:
+    - `id` (path): The ID of the user to update.
+  - **Body**: JSON object containing updated user details.
+  - **Response**: `200 OK`, JSON object of the updated user.
+
+---
+
+## Games
+
+### List Games
+- **GET** `/games`
+  - **Description**: Retrieve a list of all games.
+  - **Response**: `200 OK`, JSON array of game objects.
+
+### Get Game by ID
+- **GET** `/games/{id}`
+  - **Description**: Retrieve details of a specific game.
+  - **Parameters**:
+    - `id` (path): The ID of the game to retrieve.
+  - **Response**: `200 OK`, JSON object of the game.
+
+### Add New Game
+- **POST** `/games`
+  - **Description**: Add a new game to the collection.
+  - **Body**: JSON object containing game details.
+  - **Response**: `201 Created`, JSON object of the added game.
+
+### Delete Game
+- **DELETE** `/games/{id}`
+  - **Description**: Delete a specific game.
+  - **Parameters**:
+    - `id` (path): The ID of the game to delete.
+  - **Response**: `204 No Content`.
+
+---
+
+## Transactions
+
+### Get Transaction by ID
+- **GET** `/transactions/{id}`
+  - **Description**: Retrieve details of a specific transaction.
+  - **Parameters**:
+    - `id` (path): The ID of the transaction to retrieve.
+  - **Response**: `200 OK`, JSON object of the transaction.
+
+### Create New Transaction
+- **POST** `/transactions`
+  - **Description**: Create a new transaction.
+  - **Body**: JSON object containing transaction details.
+  - **Response**: `201 Created`, JSON object of the created transaction.
+
+### Update Transaction Status
+- **PUT** `/transactions/{id}`
+  - **Description**: Update the status of an existing transaction.
+  - **Parameters**:
+    - `id` (path): The ID of the transaction to update.
+  - **Body**: JSON object containing the new status.
+  - **Response**: `200 OK`, JSON object of the updated transaction.
+
+---
+
+## Payment Details
+
+### Get Payment Details by ID
+- **GET** `/payment-details/{id}`
+  - **Description**: Retrieve payment details for a specific ID.
+  - **Parameters**:
+    - `id` (path): The ID of the payment details to retrieve.
+  - **Response**: `200 OK`, JSON object of the payment details.
+
+### Create New Payment Details
+- **POST** `/payment-details`
+  - **Description**: Create new payment details.
+  - **Body**: JSON object containing payment details.
+  - **Response**: `201 Created`, JSON object of the created payment details.
+
+### Update Payment Details
+- **PUT** `/payment-details/{id}`
+  - **Description**: Update existing payment details.
+  - **Parameters**:
+    - `id` (path): The ID of the payment details to update.
+  - **Body**: JSON object containing updated payment details.
+  - **Response**: `200 OK`, JSON object of the updated payment details.
+
+---
+
+## Error Handling
+Provide a standardized way to handle errors, including HTTP status codes and error messages in the JSON body. Examples:
+- `400 Bad Request` - JSON `{ "error": "Description of the error" }`
+- `404 Not Found` - JSON `{ "error": "Resource not found" }`
+- `500 Internal Server Error` - JSON `{ "error": "Internal server error" }`
+
+---

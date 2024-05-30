@@ -1,0 +1,629 @@
+basePath: /api/v1
+definitions:
+  backend_internal_models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  backend_internal_models.Game:
+    properties:
+      date:
+        type: string
+      id:
+        type: string
+    type: object
+  backend_internal_models.PaymentDetails:
+    properties:
+      amount:
+        type: integer
+      details:
+        type: string
+      id:
+        type: string
+      payee:
+        $ref: '#/definitions/backend_internal_models.User'
+      payeeID:
+        type: string
+      payer:
+        $ref: '#/definitions/backend_internal_models.User'
+      payerID:
+        type: string
+      status:
+        type: string
+      timeCompleted:
+        type: string
+      timeSubmitted:
+        type: string
+    type: object
+  backend_internal_models.PlayedGames:
+    properties:
+      buyIn:
+        type: integer
+      endAmount:
+        type: integer
+      game:
+        $ref: '#/definitions/backend_internal_models.Game'
+      gameID:
+        type: string
+      player:
+        $ref: '#/definitions/backend_internal_models.User'
+      playerID:
+        type: string
+    type: object
+  backend_internal_models.Transaction:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      paymentDetails:
+        $ref: '#/definitions/backend_internal_models.PaymentDetails'
+      paymentDetailsID:
+        type: string
+      status:
+        type: string
+      user:
+        $ref: '#/definitions/backend_internal_models.User'
+      userID:
+        type: string
+    type: object
+  backend_internal_models.User:
+    properties:
+      balance:
+        type: integer
+      createdAt:
+        type: string
+      displayName:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  internal_api_handlers.CreatePaymentDetailsInput:
+    properties:
+      amount:
+        type: integer
+      details:
+        type: string
+      payee_id:
+        type: string
+      payer_id:
+        type: string
+      status:
+        type: string
+    required:
+    - amount
+    - payee_id
+    - payer_id
+    - status
+    type: object
+  internal_api_handlers.CreateTransactionInput:
+    properties:
+      payment_details_id:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: string
+    type: object
+  internal_api_handlers.CreateUserInput:
+    properties:
+      balance:
+        type: integer
+      display_name:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+    required:
+    - balance
+    - email
+    - name
+    type: object
+  internal_api_handlers.CreateUserPlayedGameInput:
+    properties:
+      buy_in:
+        type: integer
+      game_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - buy_in
+    - game_id
+    - user_id
+    type: object
+  internal_api_handlers.UpdatePaymentDetailsInput:
+    properties:
+      amount:
+        type: integer
+      details:
+        type: string
+      payee_id:
+        type: string
+      payer_id:
+        type: string
+      status:
+        type: string
+      time_completed:
+        type: string
+    type: object
+  internal_api_handlers.UpdateTransactionStatusInput:
+    properties:
+      status:
+        type: string
+    type: object
+  internal_api_handlers.UpdateUserInput:
+    properties:
+      balance:
+        type: integer
+      display_name:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+  internal_api_handlers.UpdateUserPlayedGameInput:
+    properties:
+      buy_in:
+        type: integer
+      end_amount:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: An API used to manage payments with friends for home poker games :)
+  title: Poker Finance API
+  version: "1.0"
+paths:
+  /games:
+    post:
+      description: Create a new game
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend_internal_models.Game'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Create a new game
+      tags:
+      - games
+  /games/{id}:
+    delete:
+      description: Delete a game by ID and all related played games
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Delete a game by ID
+      tags:
+      - games
+    get:
+      description: Get a game by ID
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.Game'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Get a game by ID
+      tags:
+      - games
+  /payment-details:
+    post:
+      consumes:
+      - application/json
+      description: Create new payment details
+      parameters:
+      - description: Payment Details Input
+        in: body
+        name: paymentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreatePaymentDetailsInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend_internal_models.PaymentDetails'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Create new payment details
+      tags:
+      - payment-details
+  /payment-details/{id}:
+    get:
+      description: Get payment details by ID
+      parameters:
+      - description: Payment Details ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.PaymentDetails'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Get payment details by ID
+      tags:
+      - payment-details
+    put:
+      consumes:
+      - application/json
+      description: Update payment details by ID
+      parameters:
+      - description: Payment Details ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Payment Details Input
+        in: body
+        name: paymentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.UpdatePaymentDetailsInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.PaymentDetails'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Update payment details by ID
+      tags:
+      - payment-details
+  /transactions:
+    post:
+      consumes:
+      - application/json
+      description: Create a new transaction
+      parameters:
+      - description: Transaction Input
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateTransactionInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend_internal_models.Transaction'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Create a new transaction
+      tags:
+      - transactions
+  /transactions/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update transaction status by ID
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status Update Input
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.UpdateTransactionStatusInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.Transaction'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Update transaction status by ID
+      tags:
+      - transactions
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend_internal_models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - users
+  /users/{id}:
+    get:
+      description: Get a user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Get a user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User Update Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.UpdateUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Update user information
+      tags:
+      - users
+  /users/{id}/played-games:
+    get:
+      description: Get played games by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/backend_internal_models.PlayedGames'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Get played games by user ID
+      tags:
+      - users
+  /users/{id}/played-games/{gameid}:
+    post:
+      consumes:
+      - application/json
+      description: Create a new played game entry for a user
+      parameters:
+      - description: Played Game Input
+        in: body
+        name: playedGame
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateUserPlayedGameInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend_internal_models.PlayedGames'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Create a played game for a user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update a played game's details by user ID and game ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Game ID
+        in: path
+        name: gameid
+        required: true
+        type: string
+      - description: Played Game Update Input
+        in: body
+        name: playedGame
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.UpdateUserPlayedGameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.PlayedGames'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Update a played game by user ID and game ID
+      tags:
+      - users
+  /users/{id}/transactions:
+    get:
+      description: Get all transactions by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/backend_internal_models.Transaction'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Get transactions by user ID
+      tags:
+      - users
+swagger: "2.0"
