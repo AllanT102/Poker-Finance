@@ -1,18 +1,20 @@
 package models
 
 import (
-    "time"
-    "github.com/google/uuid"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type Game struct {
-    ID   uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
-    Date time.Time `gorm:"type:timestamptz;not null"`
+	ID     uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key"`
+	Date   time.Time `gorm:"type:timestamptz;not null"`
+	Status string    `gorm:"type:varchar(50);not null"`
 }
 
 func NewGame(date time.Time) *Game {
-    return &Game{
-        ID:   uuid.New(),
-        Date: date,
-    }
+	return &Game{
+		ID:   uuid.New(),
+		Date: date,
+	}
 }

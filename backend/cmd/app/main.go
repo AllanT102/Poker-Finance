@@ -3,6 +3,7 @@ package main
 import (
 	"backend/internal/api"
 	"backend/internal/config"
+	"backend/internal/services/email"
 	"log"
 
 	_ "backend/docs"
@@ -23,9 +24,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-
+	
 	// Get database connection details from environment variables
 	config.InitDatabase()
+
+	// Initialize email queue
+	email.CreateEmailChannel()
 
 	router := gin.Default()
 	api.SetupRoutes(router)

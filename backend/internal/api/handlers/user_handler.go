@@ -12,28 +12,26 @@ import (
 )
 
 type CreateUserInput struct {
-	Email       string `json:"email" binding:"required"`
-	Name        string `json:"name" binding:"required"`
-	DisplayName string `json:"display_name"`
-	Balance     int    `json:"balance" binding:"required"`
+	Email       string  `json:"email" binding:"required"`
+	Name        string  `json:"name" binding:"required"`
+	DisplayName string  `json:"display_name"`
+	Balance     float64 `json:"balance" binding:"required"`
 }
 
 type UpdateUserInput struct {
-	Email       string `json:"email"`
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
-	Balance     int    `json:"balance"`
+	Email       string  `json:"email"`
+	Name        string  `json:"name"`
+	DisplayName string  `json:"display_name"`
+	Balance     float64 `json:"balance"`
 }
 
 type UpdateUserPlayedGameInput struct {
-	BuyIn     int `json:"buy_in"`
-	EndAmount int `json:"end_amount"`
+	BuyIn     float64 `json:"buy_in"`
+	EndAmount float64 `json:"end_amount"`
 }
 
 type CreateUserPlayedGameInput struct {
-	GameID uuid.UUID `json:"game_id" binding:"required"`
-	UserID uuid.UUID `json:"user_id" binding:"required"`
-	BuyIn  int       `json:"buy_in" binding:"required"`
+	BuyIn  float64   `json:"buy_in" binding:"required"`
 }
 
 // GetUserByID godoc
@@ -182,7 +180,7 @@ func UpdateUser(c *gin.Context) {
 func GetUserPlayedGames(c *gin.Context) {
 	id := c.Param("id")
 	var playedGames []models.PlayedGames
-	result := config.DB.Find(&playedGames, "id = ?", id)
+	result := config.DB.Find(&playedGames, "player_id = ?", id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Played games not found"})
@@ -206,6 +204,8 @@ func GetUserPlayedGames(c *gin.Context) {
 // @Failure 500 {object} models.ErrorResponse
 // @Router /users/{id}/played-games/{gameid} [post]
 func CreateUserPlayedGame(c *gin.Context) {
+	gameID := c.Param("gameid")
+	userID := c.Param("id")
 	var input CreateUserPlayedGameInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -214,8 +214,8 @@ func CreateUserPlayedGame(c *gin.Context) {
 	}
 
 	playedGame := models.PlayedGames{
-		GameID:    input.GameID,
-		PlayerID:  input.UserID,
+		GameID:    uuid.MustParse(gameID),
+		PlayerID:  uuid.MustParse(userID),
 		BuyIn:     input.BuyIn,
 		EndAmount: 0,
 	}
