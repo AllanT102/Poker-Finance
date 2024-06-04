@@ -27,12 +27,18 @@ definitions:
         type: string
       id:
         type: string
+      status:
+        type: string
     type: object
   backend_internal_models.PaymentDetails:
     properties:
       amount:
-        type: integer
+        type: number
       details:
+        type: string
+      game:
+        $ref: '#/definitions/backend_internal_models.Game'
+      gameID:
         type: string
       id:
         type: string
@@ -45,6 +51,7 @@ definitions:
       payerID:
         type: string
       status:
+        description: emailSent, complete, pending
         type: string
       timeCompleted:
         type: string
@@ -54,9 +61,9 @@ definitions:
   backend_internal_models.PlayedGames:
     properties:
       buyIn:
-        type: integer
+        type: number
       endAmount:
-        type: integer
+        type: number
       game:
         $ref: '#/definitions/backend_internal_models.Game'
       gameID:
@@ -66,27 +73,10 @@ definitions:
       playerID:
         type: string
     type: object
-  backend_internal_models.Transaction:
-    properties:
-      createdAt:
-        type: string
-      id:
-        type: string
-      paymentDetails:
-        $ref: '#/definitions/backend_internal_models.PaymentDetails'
-      paymentDetailsID:
-        type: string
-      status:
-        type: string
-      user:
-        $ref: '#/definitions/backend_internal_models.User'
-      userID:
-        type: string
-    type: object
   backend_internal_models.User:
     properties:
       balance:
-        type: integer
+        type: number
       createdAt:
         type: string
       displayName:
@@ -97,6 +87,9 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  gin.H:
+    additionalProperties: {}
     type: object
   internal_api_handlers.CreateFriendRequestInput:
     properties:
@@ -115,7 +108,7 @@ definitions:
   internal_api_handlers.CreatePaymentDetailsInput:
     properties:
       amount:
-        type: integer
+        type: number
       details:
         type: string
       payee_id:
@@ -130,19 +123,10 @@ definitions:
     - payer_id
     - status
     type: object
-  internal_api_handlers.CreateTransactionInput:
-    properties:
-      payment_details_id:
-        type: string
-      status:
-        type: string
-      user_id:
-        type: string
-    type: object
   internal_api_handlers.CreateUserInput:
     properties:
       balance:
-        type: integer
+        type: number
       display_name:
         type: string
       email:
@@ -157,15 +141,9 @@ definitions:
   internal_api_handlers.CreateUserPlayedGameInput:
     properties:
       buy_in:
-        type: integer
-      game_id:
-        type: string
-      user_id:
-        type: string
+        type: number
     required:
     - buy_in
-    - game_id
-    - user_id
     type: object
   internal_api_handlers.UpdateFriendRequestInput:
     properties:
@@ -178,7 +156,7 @@ definitions:
   internal_api_handlers.UpdatePaymentDetailsInput:
     properties:
       amount:
-        type: integer
+        type: number
       details:
         type: string
       payee_id:
@@ -190,15 +168,10 @@ definitions:
       time_completed:
         type: string
     type: object
-  internal_api_handlers.UpdateTransactionStatusInput:
-    properties:
-      status:
-        type: string
-    type: object
   internal_api_handlers.UpdateUserInput:
     properties:
       balance:
-        type: integer
+        type: number
       display_name:
         type: string
       email:
@@ -209,9 +182,9 @@ definitions:
   internal_api_handlers.UpdateUserPlayedGameInput:
     properties:
       buy_in:
-        type: integer
+        type: number
       end_amount:
-        type: integer
+        type: number
     type: object
 host: localhost:8080
 info:
@@ -289,6 +262,39 @@ paths:
       summary: Create a new friend request
       tags:
       - friend-request
+  /game/{id}/end:
+    post:
+      consumes:
+      - application/json
+      description: Ends the game with the specified ID by updating its status.
+      parameters:
+      - description: Game ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Game ended successfully
+          schema:
+            $ref: '#/definitions/backend_internal_models.Game'
+        "400":
+          description: Bad Request if the request body is incorrect
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "404":
+          description: Not Found if the game does not exist
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error for database issues
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: End a game
+      tags:
+      - game
   /games:
     post:
       description: Create a new game
@@ -444,75 +450,6 @@ paths:
       summary: Update payment details by ID
       tags:
       - payment-details
-  /transactions:
-    post:
-      consumes:
-      - application/json
-      description: Create a new transaction
-      parameters:
-      - description: Transaction Input
-        in: body
-        name: transaction
-        required: true
-        schema:
-          $ref: '#/definitions/internal_api_handlers.CreateTransactionInput'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/backend_internal_models.Transaction'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-      summary: Create a new transaction
-      tags:
-      - transactions
-  /transactions/{id}:
-    put:
-      consumes:
-      - application/json
-      description: Update transaction status by ID
-      parameters:
-      - description: Transaction ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Status Update Input
-        in: body
-        name: status
-        required: true
-        schema:
-          $ref: '#/definitions/internal_api_handlers.UpdateTransactionStatusInput'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_internal_models.Transaction'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-      summary: Update transaction status by ID
-      tags:
-      - transactions
   /users:
     post:
       consumes:
@@ -731,33 +668,6 @@ paths:
           schema:
             $ref: '#/definitions/backend_internal_models.ErrorResponse'
       summary: Update a played game by user ID and game ID
-      tags:
-      - users
-  /users/{id}/transactions:
-    get:
-      description: Get all transactions by user ID
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/backend_internal_models.Transaction'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-      summary: Get transactions by user ID
       tags:
       - users
 swagger: "2.0"

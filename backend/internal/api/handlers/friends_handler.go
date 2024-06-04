@@ -6,6 +6,7 @@ import (
 
 	"backend/internal/config"
 	"backend/internal/models"
+	"backend/internal/constants"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -15,7 +16,6 @@ import (
 type CreateFriendRequestInput struct {
 	UserID      uuid.UUID `json:"user_id" binding:"required"`
 	FriendEmail string    `json:"friend_email" binding:"required"`
-	Status      string    `json:"status" binding:"required"` // e.g., "pending", "accepted", "declined"
 }
 
 type UpdateFriendRequestInput struct {
@@ -56,7 +56,7 @@ func CreateFriendRequest(c *gin.Context) {
 		ID:        uuid.New(),
 		UserID:    input.UserID,
 		FriendID:  user.ID,
-		Status:    input.Status,
+		Status:    constants.FRIEND_REQUEST_PENDING,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

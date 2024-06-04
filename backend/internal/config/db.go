@@ -20,14 +20,14 @@ func InitDatabase() {
 
 	// Enable UUID extension if not already enabled
 	DB.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
-	
+
 	// AutoMigrate the schema
 	err = DB.AutoMigrate(
 		&models.User{},
 		&models.Game{},
-		// &models.Transaction{},
 		&models.PaymentDetails{},
 		&models.PlayedGames{},
+		&models.FriendRequest{},
 	)
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)

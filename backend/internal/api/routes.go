@@ -31,11 +31,6 @@ func SetupRoutes(router *gin.Engine) {
 		v1.DELETE("/games/:id", handlers.DeleteGame)
 		v1.POST("/games/:id/end", handlers.EndGame)
 
-		// // Transaction routes
-		// v1.GET("/users/:id/transactions", handlers.GetUserTransactions)
-		// v1.POST("/transactions", handlers.CreateTransaction)
-		// v1.PUT("/transactions/:id", handlers.UpdateTransactionStatus)
-
 		// Payment Details routes
 		v1.GET("/payment-details/:id", handlers.GetPaymentDetailsByID)
 		v1.POST("/payment-details", handlers.CreatePaymentDetails)

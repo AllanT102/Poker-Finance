@@ -120,6 +120,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/game/{id}/end": {
+            "post": {
+                "description": "Ends the game with the specified ID by updating its status.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "game"
+                ],
+                "summary": "End a game",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Game ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game ended successfully",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.Game"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request if the request body is incorrect",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found if the game does not exist",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error for database issues",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/games": {
             "post": {
                 "description": "Create a new game",
@@ -332,111 +382,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/backend_internal_models.PaymentDetails"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/transactions": {
-            "post": {
-                "description": "Create a new transaction",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transactions"
-                ],
-                "summary": "Create a new transaction",
-                "parameters": [
-                    {
-                        "description": "Transaction Input",
-                        "name": "transaction",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateTransactionInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.Transaction"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/transactions/{id}": {
-            "put": {
-                "description": "Update transaction status by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transactions"
-                ],
-                "summary": "Update transaction status by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Transaction ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Status Update Input",
-                        "name": "status",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.UpdateTransactionStatusInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.Transaction"
                         }
                     },
                     "400": {
@@ -792,47 +737,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/users/{id}/transactions": {
-            "get": {
-                "description": "Get all transactions by user ID",
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get transactions by user ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/backend_internal_models.Transaction"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -876,6 +780,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
@@ -883,9 +790,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "details": {
+                    "type": "string"
+                },
+                "game": {
+                    "$ref": "#/definitions/backend_internal_models.Game"
+                },
+                "gameID": {
                     "type": "string"
                 },
                 "id": {
@@ -904,6 +817,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "description": "emailSent, complete, pending",
                     "type": "string"
                 },
                 "timeCompleted": {
@@ -918,10 +832,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "buyIn": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "endAmount": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "game": {
                     "$ref": "#/definitions/backend_internal_models.Game"
@@ -937,37 +851,11 @@ const docTemplate = `{
                 }
             }
         },
-        "backend_internal_models.Transaction": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "paymentDetails": {
-                    "$ref": "#/definitions/backend_internal_models.PaymentDetails"
-                },
-                "paymentDetailsID": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/backend_internal_models.User"
-                },
-                "userID": {
-                    "type": "string"
-                }
-            }
-        },
         "backend_internal_models.User": {
             "type": "object",
             "properties": {
                 "balance": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "createdAt": {
                     "type": "string"
@@ -985,6 +873,10 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "gin.H": {
+            "type": "object",
+            "additionalProperties": {}
         },
         "internal_api_handlers.CreateFriendRequestInput": {
             "type": "object",
@@ -1016,7 +908,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "amount": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "details": {
                     "type": "string"
@@ -1032,20 +924,6 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_api_handlers.CreateTransactionInput": {
-            "type": "object",
-            "properties": {
-                "payment_details_id": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "internal_api_handlers.CreateUserInput": {
             "type": "object",
             "required": [
@@ -1055,7 +933,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "balance": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "display_name": {
                     "type": "string"
@@ -1071,19 +949,11 @@ const docTemplate = `{
         "internal_api_handlers.CreateUserPlayedGameInput": {
             "type": "object",
             "required": [
-                "buy_in",
-                "game_id",
-                "user_id"
+                "buy_in"
             ],
             "properties": {
                 "buy_in": {
-                    "type": "integer"
-                },
-                "game_id": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
+                    "type": "number"
                 }
             }
         },
@@ -1103,7 +973,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "details": {
                     "type": "string"
@@ -1122,19 +992,11 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_api_handlers.UpdateTransactionStatusInput": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
         "internal_api_handlers.UpdateUserInput": {
             "type": "object",
             "properties": {
                 "balance": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "display_name": {
                     "type": "string"
@@ -1151,10 +1013,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "buy_in": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "end_amount": {
-                    "type": "integer"
+                    "type": "number"
                 }
             }
         }

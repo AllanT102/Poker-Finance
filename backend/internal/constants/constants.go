@@ -7,3 +7,8 @@ const (
 	PAYMENT_DETAILS_EMAIL_SENT = "emailsent"
 	PAYMENT_DETAILS_FAILED     = "failed"
 )
+
+const (
+	FRIEND_REQUEST_PENDING  = "pending"
+	FRIEND_REQUEST_ACCEPTED = "accepted"
+)

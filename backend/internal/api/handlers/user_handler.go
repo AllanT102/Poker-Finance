@@ -31,7 +31,7 @@ type UpdateUserPlayedGameInput struct {
 }
 
 type CreateUserPlayedGameInput struct {
-	BuyIn  float64   `json:"buy_in" binding:"required"`
+	BuyIn float64 `json:"buy_in" binding:"required"`
 }
 
 // GetUserByID godoc
@@ -279,30 +279,6 @@ func UpdateUserPlayedGame(c *gin.Context) {
 	c.JSON(http.StatusOK, playedGame)
 }
 
-// GetUserTransactions godoc
-// @Summary Get transactions by user ID
-// @Description Get all transactions by user ID
-// @Tags users
-// @Param id path string true "User ID"
-// @Success 200 {array} models.Transaction
-// @Failure 404 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
-// @Router /users/{id}/transactions [get]
-func GetUserTransactions(c *gin.Context) {
-	id := c.Param("id")
-	var transactions []models.Transaction
-	result := config.DB.Find(&transactions, "id = ?", id)
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Played games not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
-		}
-		return
-	}
-	c.JSON(http.StatusOK, transactions)
-}
-
 // GetUserFriends godoc
 // @Summary Get friends by user ID
 // @Description Get all friends of a user by user ID
@@ -331,6 +307,8 @@ func GetUserFriends(c *gin.Context) {
 		c.JSON(http.StatusNotFound, models.ErrorResponse{Error: "No friends found"})
 		return
 	}
+
+	// TODO return the users not friend requests
 
 	c.JSON(http.StatusOK, friends)
 }
