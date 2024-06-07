@@ -25,6 +25,9 @@ func SetupRoutes(router *gin.Engine) {
 		v1.POST("/users/:id/played-games/:gameid", handlers.CreateUserPlayedGame)
 		v1.PUT("/users/:id/played-games/:gameid", handlers.UpdateUserPlayedGame)
 
+		// payments
+		v1.GET("/users/:id/payments", handlers.GetUserPayments)
+
 		// Game routes
 		v1.GET("/games/:id", handlers.GetGameByID)
 		v1.POST("/games", handlers.CreateGame)

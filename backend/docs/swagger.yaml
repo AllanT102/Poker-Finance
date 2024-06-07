@@ -95,14 +95,10 @@ definitions:
     properties:
       friend_email:
         type: string
-      status:
-        description: e.g., "pending", "accepted", "declined"
-        type: string
       user_id:
         type: string
     required:
     - friend_email
-    - status
     - user_id
     type: object
   internal_api_handlers.CreatePaymentDetailsInput:
@@ -193,7 +189,37 @@ info:
   title: Poker Finance API
   version: "1.0"
 paths:
-  /FriendRequests/{id}:
+  /friend-request:
+    post:
+      consumes:
+      - application/json
+      description: Create a new friend request
+      parameters:
+      - description: Friend Request Input
+        in: body
+        name: FriendRequest
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateFriendRequestInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/backend_internal_models.FriendRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Create a new friend request
+      tags:
+      - friend-request
+  /friend-request/{id}:
     put:
       consumes:
       - application/json
@@ -230,36 +256,6 @@ paths:
           schema:
             $ref: '#/definitions/backend_internal_models.ErrorResponse'
       summary: Update a friend request by ID
-      tags:
-      - friend-request
-  /friend-request:
-    post:
-      consumes:
-      - application/json
-      description: Create a new friend request
-      parameters:
-      - description: Friend Request Input
-        in: body
-        name: FriendRequest
-        required: true
-        schema:
-          $ref: '#/definitions/internal_api_handlers.CreateFriendRequestInput'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/backend_internal_models.FriendRequest'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-      summary: Create a new friend request
       tags:
       - friend-request
   /game/{id}/end:

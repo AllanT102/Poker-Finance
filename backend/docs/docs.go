@@ -15,7 +15,53 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/FriendRequests/{id}": {
+        "/friend-request": {
+            "post": {
+                "description": "Create a new friend request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend-request"
+                ],
+                "summary": "Create a new friend request",
+                "parameters": [
+                    {
+                        "description": "Friend Request Input",
+                        "name": "FriendRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api_handlers.CreateFriendRequestInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.FriendRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend-request/{id}": {
             "put": {
                 "description": "Update a FriendRequest's status by ID",
                 "consumes": [
@@ -61,52 +107,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/friend-request": {
-            "post": {
-                "description": "Create a new friend request",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "friend-request"
-                ],
-                "summary": "Create a new friend request",
-                "parameters": [
-                    {
-                        "description": "Friend Request Input",
-                        "name": "FriendRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateFriendRequestInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/backend_internal_models.FriendRequest"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/backend_internal_models.ErrorResponse"
                         }
@@ -882,15 +882,10 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "friend_email",
-                "status",
                 "user_id"
             ],
             "properties": {
                 "friend_email": {
-                    "type": "string"
-                },
-                "status": {
-                    "description": "e.g., \"pending\", \"accepted\", \"declined\"",
                     "type": "string"
                 },
                 "user_id": {

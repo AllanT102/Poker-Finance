@@ -312,3 +312,44 @@ func GetUserFriends(c *gin.Context) {
 
 	c.JSON(http.StatusOK, friends)
 }
+
+// @Summary Retrieve user payments
+// @Description get payments by user ID
+// @Tags payments
+// @Accept  json
+// @Produce  json
+// @Param userId path string true "User ID"
+// @Success 200 {array} map[string]interface{} "Successful retrieval of payment information"
+// @Failure 400 {object} map[string]interface{} "Invalid User ID"
+// @Failure 500 {object} map[string]interface{} "Internal Server Error"
+// @Router /user/{userId}/payments [get]
+func GetUserPayments(c *gin.Context) {
+	// You would typically get some user identifier from the context, such as a user ID
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	var payments []models.PaymentDetails
+	result := config.DB.Where("payer_id = ?", id).Preload("Payee").Find(&payments)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not retrieve payments"})
+		return
+	}
+
+	response := make([]map[string]interface{}, 0, len(payments))
+	for _, payment := range payments {
+		paymentDetails := map[string]interface{}{
+			"game_id":            payment.GameID,
+			"payee_display_name": payment.Payee.DisplayName,
+			"amount":             payment.Amount,
+			"details":            payment.Details,
+			"time_submitted":     payment.TimeSubmitted,
+			"status":             payment.Status,
+		}
+		response = append(response, paymentDetails)
+	}
+
+	c.JSON(http.StatusOK, response)
+}

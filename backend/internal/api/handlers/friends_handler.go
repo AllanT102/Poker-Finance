@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"backend/internal/config"
-	"backend/internal/models"
 	"backend/internal/constants"
+	"backend/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -82,7 +82,7 @@ func CreateFriendRequest(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /FriendRequests/{id} [put]
+// @Router /friend-request/{id} [put]
 func UpdateFriendRequest(c *gin.Context) {
 	id := c.Param("id")
 	FriendRequestID, err := uuid.Parse(id)

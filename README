@@ -16,14 +16,6 @@ Backend:
 # TimeCompleted: DateTime
 # Status: String -> "Completed, Cancelled, Pending"
 
-# Transaction
-# ID: UUID
-# userID: UUID
-# paymentDetailsID: UUID
-# createdAt: DateTtime
-# status: String
-# amount: Integer
-
 # User
 # ID: UUID
 # Email: string
@@ -105,31 +97,6 @@ Describe your authentication mechanisms here (e.g., OAuth2, API keys).
   - **Parameters**:
     - `id` (path): The ID of the game to delete.
   - **Response**: `204 No Content`.
-
----
-
-## Transactions
-
-### Get Transaction by ID
-- **GET** `/transactions/{id}`
-  - **Description**: Retrieve details of a specific transaction.
-  - **Parameters**:
-    - `id` (path): The ID of the transaction to retrieve.
-  - **Response**: `200 OK`, JSON object of the transaction.
-
-### Create New Transaction
-- **POST** `/transactions`
-  - **Description**: Create a new transaction.
-  - **Body**: JSON object containing transaction details.
-  - **Response**: `201 Created`, JSON object of the created transaction.
-
-### Update Transaction Status
-- **PUT** `/transactions/{id}`
-  - **Description**: Update the status of an existing transaction.
-  - **Parameters**:
-    - `id` (path): The ID of the transaction to update.
-  - **Body**: JSON object containing the new status.
-  - **Response**: `200 OK`, JSON object of the updated transaction.
 
 ---
 

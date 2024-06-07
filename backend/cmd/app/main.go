@@ -5,33 +5,75 @@ import (
 	"backend/internal/config"
 	"backend/internal/services/email"
 	"log"
-
-	_ "backend/docs"
+	"net"
+	"net/http"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"golang.org/x/time/rate"
 )
 
-// @title           Poker Finance API
-// @version         1.0
-// @description     An API used to manage payments with friends for home poker games :)
+type client struct {
+	limiter  *rate.Limiter
+	lastSeen time.Time
+}
 
-// @host      localhost:8080
-// @BasePath  /api/v1
+func perClientRateLimiter() gin.HandlerFunc {
+	var (
+		mu      sync.Mutex
+		clients = make(map[string]*client)
+	)
+	go func() {
+		for {
+			time.Sleep(time.Minute)
+			mu.Lock()
+			for ip, client := range clients {
+				if time.Since(client.lastSeen) > 3*time.Minute {
+					delete(clients, ip)
+				}
+			}
+			mu.Unlock()
+		}
+	}()
+
+	return func(c *gin.Context) {
+		ip, _, err := net.SplitHostPort(c.Request.RemoteAddr)
+		if err != nil {
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		mu.Lock()
+		if _, found := clients[ip]; !found {
+			clients[ip] = &client{limiter: rate.NewLimiter(2, 4)}
+		}
+		clients[ip].lastSeen = time.Now()
+		if !clients[ip].limiter.Allow() {
+			mu.Unlock()
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"status": "Request Failed",
+				"body":   "The API is at capacity, try again later.",
+			})
+			c.Abort()
+			return
+		}
+		mu.Unlock()
+		c.Next()
+	}
+}
+
 func main() {
-	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-	
-	// Get database connection details from environment variables
-	config.InitDatabase()
 
-	// Initialize email queue
+	config.InitDatabase()
 	email.CreateEmailChannel()
 
 	router := gin.Default()
+	router.Use(perClientRateLimiter())
 	api.SetupRoutes(router)
 
 	log.Fatal(router.Run(":8080"))
