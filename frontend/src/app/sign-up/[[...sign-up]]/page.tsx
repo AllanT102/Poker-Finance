@@ -20,7 +20,7 @@ export default function SignUpPage() {
                 <Card className="w-full sm:w-96">
                   <CardHeader>
                     <CardTitle>Create your account</CardTitle>
-                    <CardDescription>Welcome! Please fill in the details to get started.</CardDescription>
+                    <CardDescription>Welcome, start tracking your poker wins!</CardDescription>
                   </CardHeader>
                   <CardContent className="grid gap-y-4">
                     <div className="grid grid-cols-1 gap-x-4">
@@ -42,6 +42,13 @@ export default function SignUpPage() {
                       </Clerk.Connection>
                     </div>
                   </CardContent>
+                  <CardFooter>
+                      <div className="grid w-full gap-y-4">
+                        <Button variant="link" size="sm" asChild>
+                          <Link href="/sign-in">Already have an account? Sign in</Link>
+                        </Button>
+                      </div>
+                    </CardFooter>
                 </Card>
               </SignUp.Step>
 

@@ -1,14 +1,16 @@
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+'use client'
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <SignedOut>
-        <SignInButton />
-      </SignedOut>
-      <SignedIn>
-        <UserButton />
-      </SignedIn>
-    </main>
-  );
+  const pathname = usePathname()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (pathname === '/') {
+      router.push('/dashboard')
+    }
+  }, [pathname, router])
+
+  return null;
 }
