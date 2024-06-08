@@ -19,7 +19,6 @@ type CreateUserInput struct {
 }
 
 type UpdateUserInput struct {
-	Email       string  `json:"email"`
 	Name        string  `json:"name"`
 	DisplayName string  `json:"display_name"`
 	Balance     float64 `json:"balance"`
@@ -131,11 +130,11 @@ func CreateUser(c *gin.Context) {
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /users/{id} [put]
+// @Router /users/{email} [put]
 func UpdateUser(c *gin.Context) {
-	id := c.Param("id")
+	email := c.Param("id")
 	var user models.User
-	result := config.DB.First(&user, "id = ?", id)
+	result := config.DB.First(&user, "email = ?", email)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -153,7 +152,6 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	updatedData := models.User{
-		Email:       input.Email,
 		Name:        input.Name,
 		DisplayName: input.DisplayName,
 		Balance:     input.Balance,

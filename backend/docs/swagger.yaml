@@ -1,4 +1,3 @@
-basePath: /api/v1
 definitions:
   backend_internal_models.ErrorResponse:
     properties:
@@ -170,8 +169,6 @@ definitions:
         type: number
       display_name:
         type: string
-      email:
-        type: string
       name:
         type: string
     type: object
@@ -182,12 +179,8 @@ definitions:
       end_amount:
         type: number
     type: object
-host: localhost:8080
 info:
   contact: {}
-  description: An API used to manage payments with friends for home poker games :)
-  title: Poker Finance API
-  version: "1.0"
 paths:
   /friend-request:
     post:
@@ -446,6 +439,40 @@ paths:
       summary: Update payment details by ID
       tags:
       - payment-details
+  /user/{userId}/payments:
+    get:
+      consumes:
+      - application/json
+      description: get payments by user ID
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful retrieval of payment information
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "400":
+          description: Invalid User ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Retrieve user payments
+      tags:
+      - payments
   /users:
     post:
       consumes:
@@ -476,31 +503,7 @@ paths:
       summary: Create a new user
       tags:
       - users
-  /users/{id}:
-    get:
-      description: Get a user by email
-      parameters:
-      - description: User email
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_internal_models.User'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/backend_internal_models.ErrorResponse'
-      summary: Get a user by email
-      tags:
-      - users
+  /users/{email}:
     put:
       consumes:
       - application/json
@@ -537,6 +540,31 @@ paths:
           schema:
             $ref: '#/definitions/backend_internal_models.ErrorResponse'
       summary: Update user information
+      tags:
+      - users
+  /users/{id}:
+    get:
+      description: Get a user by email
+      parameters:
+      - description: User email
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_internal_models.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/backend_internal_models.ErrorResponse'
+      summary: Get a user by email
       tags:
       - users
   /users/{id}/friends:
