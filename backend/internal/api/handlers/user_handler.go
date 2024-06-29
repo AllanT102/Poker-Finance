@@ -12,25 +12,25 @@ import (
 )
 
 type CreateUserInput struct {
-	Email       string  `json:"email" binding:"required"`
-	Name        string  `json:"name" binding:"required"`
-	DisplayName string  `json:"display_name"`
-	Balance     float64 `json:"balance" binding:"required"`
+	Email       string   `json:"email" binding:"required"`
+	Name        string   `json:"name" binding:"required"`
+	DisplayName string   `json:"display_name"`
+	Balance     *float64 `json:"balance" binding:"gte=0"`
 }
 
 type UpdateUserInput struct {
-	Name        string  `json:"name"`
-	DisplayName string  `json:"display_name"`
-	Balance     float64 `json:"balance"`
+	Name        string   `json:"name"`
+	DisplayName string   `json:"display_name"`
+	Balance     *float64 `json:"balance"`
 }
 
 type UpdateUserPlayedGameInput struct {
-	BuyIn     float64 `json:"buy_in"`
-	EndAmount float64 `json:"end_amount"`
+	BuyIn     float64  `json:"buy_in"`
+	EndAmount *float64 `json:"end_amount"`
 }
 
 type CreateUserPlayedGameInput struct {
-	BuyIn float64 `json:"buy_in" binding:"required"`
+	BuyIn *float64 `json:"buy_in" binding:"required,gte=0"`
 }
 
 // GetUserByID godoc
@@ -65,7 +65,7 @@ func GetUserByID(c *gin.Context) {
 // @Success 200 {object} models.User
 // @Failure 404 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /users/{id} [get]
+// @Router /users/emails/{email} [get]
 func GetUserByEmail(c *gin.Context) {
 	email := c.Param("email")
 	var user models.User
@@ -105,7 +105,7 @@ func CreateUser(c *gin.Context) {
 		Email:       input.Email,
 		Name:        input.Name,
 		DisplayName: input.DisplayName,
-		Balance:     input.Balance,
+		Balance:     *input.Balance,
 		CreatedAt:   time.Now(),
 	}
 
@@ -154,7 +154,7 @@ func UpdateUser(c *gin.Context) {
 	updatedData := models.User{
 		Name:        input.Name,
 		DisplayName: input.DisplayName,
-		Balance:     input.Balance,
+		Balance:     *input.Balance,
 	}
 
 	result = config.DB.Model(&user).Updates(updatedData)
@@ -178,7 +178,7 @@ func UpdateUser(c *gin.Context) {
 func GetUserPlayedGames(c *gin.Context) {
 	id := c.Param("id")
 	var playedGames []models.PlayedGames
-	result := config.DB.Find(&playedGames, "player_id = ?", id)
+	result := config.DB.Preload("Game").Find(&playedGames, "player_id = ?", id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Played games not found"})
@@ -214,7 +214,7 @@ func CreateUserPlayedGame(c *gin.Context) {
 	playedGame := models.PlayedGames{
 		GameID:    uuid.MustParse(gameID),
 		PlayerID:  uuid.MustParse(userID),
-		BuyIn:     input.BuyIn,
+		BuyIn:     *input.BuyIn,
 		EndAmount: 0,
 	}
 
@@ -265,7 +265,7 @@ func UpdateUserPlayedGame(c *gin.Context) {
 
 	updatedData := models.PlayedGames{
 		BuyIn:     input.BuyIn,
-		EndAmount: input.EndAmount,
+		EndAmount: *input.EndAmount,
 	}
 
 	result = config.DB.Model(&playedGame).Updates(updatedData)

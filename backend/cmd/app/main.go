@@ -4,6 +4,7 @@ import (
 	"backend/internal/api"
 	"backend/internal/config"
 	"backend/internal/services/email"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"golang.org/x/time/rate"
 )
@@ -63,6 +66,12 @@ func perClientRateLimiter() gin.HandlerFunc {
 	}
 }
 
+func validFloat(fl validator.FieldLevel) bool {
+	float := fl.Field().Float()
+	fmt.Println(float >= 0.0)
+	return true
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -71,6 +80,10 @@ func main() {
 
 	config.InitDatabase()
 	email.CreateEmailChannel()
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("valid_float", validFloat)
+	}
 
 	router := gin.Default()
 	router.Use(perClientRateLimiter())

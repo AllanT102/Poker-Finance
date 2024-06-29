@@ -1,0 +1,11 @@
+FROM golang:1.22.3
+
+WORKDIR /go/src/app
+
+COPY . . 
+
+RUN cd cmd/app && go build -o ../../main
+
+EXPOSE 8080
+
+CMD ["./main"]
